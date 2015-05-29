@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - postprocessing</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				margin: 0px;
+				background-color: #000000;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src="http://threejs.org/build/three.min.js"></script> 
+		<script src="http://underscorejs.org/underscore-min.js"></script>
+
+		<script src="js/shaders/CopyShader.js"></script>
+		<script src="js/shaders/DotScreenShader.js"></script>
+		<script src="js/shaders/RGBShiftShader.js"></script>
+		<script src="js/shaders/MapShader.js"></script>
+		<script src="js/shaders/MosaicComparerShader.js"></script>
+		<script src="js/shaders/MosaicImageComposerShader.js"></script>
+
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/MaskPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/MosaicPass.js"></script>
+		<script src="js/postprocessing/TexturePass.js"></script>
+		<script src="js/postprocessing/SavePass.js"></script>
+
+
+		<script>
+
+			var camera, scene, renderer, imageComparer, mosaicMap, renderTarget, mosaicImageComposer;
+			var object, light;
+			var previousSingleImageMap ;	
+			var width = 400.0; var height = 400.0;
+			var mosaicWidth = 20.0, mosaicHeight = 20.0;
+
+			init();
+			animate();
+
+			function init() {			
+				InitializeThreejs();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+
+			function InitializeThreejs(){
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( width, height );
+				document.body.appendChild( renderer.domElement );
+
+				//camera = new THREE.PerspectiveCamera( 45, width / height, 1, 1000 );
+				camera = new THREE.OrthographicCamera( width / -2, width / 2, height / 2, height / -2, 1, 100 );
+				camera.position.z = 2;
+
+				var mosaicImage = THREE.ImageUtils.loadTexture('img/2013-08-19 15.30.53.png');
+				var resultImage = THREE.ImageUtils.loadTexture('img/2013-08-19 15.30.55.png');
+
+				createMosaicTemplateWith(mosaicImage);	
+
+				createImageComparer(resultImage);				
+
+				// var latestSingleImageMap= imageComparer.renderTarget2;		
+				// if (previousSingleImageMap == undefined){
+				// 	previousSingleImageMap = latestSingleImageMap;
+				// }
+
+
+				// createMosaicMap(previousSingleImageMap, latestSingleImageMap);
+				// mosaicMap.render();
+
+				// previousSingleImageMap = mosaicMap.renderTarget2;
+
+				/*insertMosaicImageIntoResultImage(previousSingleImageMap, THREE.ImageUtils.loadTexture('img/white.png'), 0.01);
+				mosaicImageComposer.render();*/	
+
+			}
+
+			function createMosaicTemplateWith(mosaicImage){
+				scene = new THREE.Scene();
+
+				var mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+				var radius = 5; 
+				var segments = 10; 
+				var circleGeometry = new THREE.CircleGeometry( radius, segments );
+				var circle = new THREE.Mesh( circleGeometry, mat ); 
+				scene.add( circle );
+
+				circle = new THREE.Mesh(circleGeometry, mat);
+				circle.position.set(-20.0,0,0);
+				scene.add(circle);
+
+				object = new THREE.Object3D();
+
+				var geometry = new THREE.PlaneBufferGeometry( mosaicWidth, mosaicHeight );
+				var material =  new THREE.MeshBasicMaterial({ map: mosaicImage});		
+
+				var maxMosaicItemCountX = width / mosaicWidth;
+				var maxMosaicItemCountY = height / mosaicHeight;
+				for ( i = -Math.floor(maxMosaicItemCountX / 2.0); i < Math.floor(maxMosaicItemCountX / 2.0); i += 1 ) {
+			      for ( j = -Math.floor(maxMosaicItemCountY / 2.0); j < Math.floor(maxMosaicItemCountY / 2.0); j += 1 ) {
+			        var instance = new THREE.Mesh( geometry, material );
+			        instance.position.set( i*mosaicWidth+(mosaicWidth / 2.0), j*mosaicHeight+(mosaicHeight / 2.0), 0 );
+			        object.add( instance );
+			      }
+			    }
+
+			    scene.add( object );
+
+				// scene.add( new THREE.AmbientLight( 0x222222 ) );
+
+				// light = new THREE.DirectionalLight( 0xffffff );
+				// light.position.set( 1, 1, 10 );
+				// scene.add( light );
+			}
+
+						// width and height auf 40x40 reduzieren
+
+			function createImageComparer(resultImage){
+				imageComparer = new THREE.EffectComposer( renderer);
+				imageComparer.addPass( new THREE.RenderPass( scene, camera ) );
+				//imageComparer.addPass( new THREE.ShaderPass(THREE.CopyShader));
+				imageComparer.addPass( new THREE.MosaicPass( THREE.MapShader, 0.01, resultImage, width, height));
+				var screenPass = new THREE.ShaderPass(THREE.CopyShader);			
+				screenPass.renderToScreen = true;
+				imageComparer.addPass( screenPass );
+			}
+
+			function createMosaicMap (previousSingleImageMap, latestSingleImageMap){
+					var mosaicMapScene = new THREE.Scene();
+				geometry = new THREE.PlaneBufferGeometry( mosaicWidth, mosaicHeight,0 );
+				material =  new THREE.MeshBasicMaterial({ map: previousSingleImageMap});	
+				 var instance = new THREE.Mesh( geometry, material );
+				 mosaicMapScene.add(instance);
+				mosaicMapScene.add(light);
+				mosaicMap = new THREE.EffectComposer( renderer );
+				mosaicMap.addPass( new THREE.RenderPass( mosaicMapScene, camera ) );				
+				mosaicMap.addPass( new THREE.MosaicPass(THREE.MosaicComparerShader, null, latestSingleImageMap, width, height))
+				var screenPass = new THREE.ShaderPass(THREE.CopyShader);			
+				screenPass.renderToScreen = true;
+				mosaicMap.addPass(screenPass);
+			}
+
+			function insertMosaicImageIntoResultImage(mosaicMap, mosaicImage, mosaicImageId){
+				var mosaicImageScene = new THREE.Scene();
+				var geometry = new THREE.PlaneGeometry( mosaicWidth, mosaicHeight,0 );
+				var material =  new THREE.MeshBasicMaterial({ map: mosaicMap});	
+				var instance = new THREE.Mesh( geometry, material );
+				mosaicImageScene.add(instance);
+				mosaicImageScene.add(light);
+				mosaicImageComposer = new THREE.EffectComposer( renderer );
+				mosaicImageComposer.addPass( new THREE.RenderPass( mosaicImageScene, camera ) );
+				mosaicImageComposer.addPass( new THREE.MosaicPass(THREE.MosaicImageComposerShader, mosaicImageId, mosaicImage, width, height))
+				var copyToScreenShader = new THREE.ShaderPass(THREE.CopyShader);
+				copyToScreenShader.renderToScreen = true;				
+				mosaicImageComposer.addPass( copyToScreenShader);	
+			}
+
+
+
+			function onWindowResize() {
+
+				//camera.aspect = width / height;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( width, height );
+
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+
+				//renderer.render(scene, camera);	
+
+				imageComparer.render();			
+			}
+
+		</script>
+
+	</body>
+</html>
