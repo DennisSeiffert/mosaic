@@ -47,24 +47,23 @@ THREE.MapShader = {
 
 		"void main() {",
 			"vec4 texel = texture2D( tDiffuse, vUv );",
-			"vec4 texel1 = texture2D( tOverlay, vUv );",
 			"vec3 sum;",
 			"vec3 rgbDiffuse;",
 			"vec3 rgbOverlay;",
 
-			"//gl_FragColor =  texel;",
-			"if (mod(floor(vUv.x * innerWidth), 20.00000) < 1.0 && mod(floor(vUv.y * innerHeight), 20.00000) < 1.0) {",
+			"gl_FragColor =  vec4(1.0,1.0,1.0,1.0);",
+			"if (fract(gl_FragCoord.x / 20.0) < 0.05 && fract(gl_FragCoord.y / 20.0) < 0.05) {",
+				"//gl_FragColor =  vec4(1.0,0.0,0.0,1.0);",
 				"for (float i=0.0; i<10.0; i+=1.0) {",
 					"for (float j=0.0; j<10.0; j+=1.0) {",
-						"rgbDiffuse = texture2D(tDiffuse, vUv + vec2(shift.x * i, shift.y * j) ).rgb;",
-						"rgbOverlay = texture2D(tOverlay, vUv + vec2(shift.x * i, shift.y * j) ).rgb;",					
-						"sum += abs(rgbDiffuse - rgbOverlay);",
+						"//rgbDiffuse = texture2D(tDiffuse, vUv + vec2(shift.x * i, shift.y * j) ).rgb;",
+						"//rgbOverlay = texture2D(tOverlay, vUv + vec2(shift.x * i, shift.y * j) ).rgb;",					
+						"//sum += abs(rgbDiffuse - rgbOverlay);",
 					"}",
 				"}",
-				"gl_FragColor = vec4(((sum * vec3(1.0/100.0,1.0/100.0,1.0/100.0)) * 1.0 / 3.0,0.0,0.0,1.0);",
-			"} else {",
-				"gl_FragColor = vec4(1.0,1.0,1.0,1.0); // texture2D(tDiffuse, vUv);",
-			"}",			
+				"//gl_FragColor = vec4((sum * vec3(1.0/100.0,1.0/100.0,1.0/100.0)),1.0);",
+				"gl_FragColor =  vec4(0.0,0.0,0.0,1.0);",
+			"} ",			
 		"}"
 
 	].join("\n")
