@@ -2,7 +2,7 @@
  * @author alteredq / http://alteredqualia.com/
  */
 
-THREE.MosaicPass = function ( shader, overlayPictureId, overlayTexture, innerWidth, innerHeight ) {
+THREE.MosaicPass = function ( shader, overlayPictureId, overlayTexture, innerWidth, innerHeight, stepSizeX, stepSizeY) {
 
 	this.textureID = "tDiffuse";
 
@@ -13,6 +13,10 @@ THREE.MosaicPass = function ( shader, overlayPictureId, overlayTexture, innerWid
 	this.innerWidth = innerWidth;
 
 	this.innerHeight = innerHeight;
+
+	this.stepSizeX = stepSizeX;
+
+	this.stepSizeY = stepSizeY;
 
 	this.overlayPictureId = overlayPictureId;
 
@@ -47,11 +51,17 @@ THREE.MosaicPass.prototype = {
 
 		this.uniforms[ this.textureID ].value = readBuffer;
 
-		this.uniforms[ this.overlayID ].value = this.overlayTexture;
+		if(this.uniforms[ this.overlayID ]){
+			this.uniforms[ this.overlayID ].value = this.overlayTexture;
+		}
 
 		this.uniforms[ "innerWidth" ].value = this.innerWidth;
 
 		this.uniforms[ "innerHeight" ].value = this.innerHeight;
+
+		this.uniforms[ "stepSizeX" ].value = this.stepSizeX;
+
+		this.uniforms[ "stepSizeY" ].value = this.stepSizeY;
 
 		if(this.uniforms[ "overlayPictureId" ]){
 			this.uniforms[ "overlayPictureId" ].value = this.overlayPictureId;

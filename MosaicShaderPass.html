@@ -20,6 +20,7 @@
 		<script src="js/shaders/DotScreenShader.js"></script>
 		<script src="js/shaders/RGBShiftShader.js"></script>
 		<script src="js/shaders/MapShader.js"></script>
+		<script src="js/shaders/ReduceShader.js"></script>
 		<script src="js/shaders/MosaicComparerShader.js"></script>
 		<script src="js/shaders/MosaicImageComposerShader.js"></script>
 
@@ -127,7 +128,9 @@
 				imageComparer = new THREE.EffectComposer( renderer);
 				imageComparer.addPass( new THREE.RenderPass( scene, camera ) );
 				//imageComparer.addPass( new THREE.ShaderPass(THREE.CopyShader));
-				imageComparer.addPass( new THREE.MosaicPass( THREE.MapShader, 0.01, resultImage, width, height));
+				imageComparer.addPass( new THREE.MosaicPass( THREE.MapShader, 0.01, resultImage, width, height, 1.0, 1.0));
+				imageComparer.addPass( new THREE.MosaicPass( THREE.ReduceShader, 0.01, null, width, height, 3.0, 3.0));
+				//imageComparer.addPass( new THREE.MosaicPass( THREE.ReduceShader, 0.01, null, width, height, 9.0, 9.0));
 				var screenPass = new THREE.ShaderPass(THREE.CopyShader);			
 				screenPass.renderToScreen = true;
 				imageComparer.addPass( screenPass );
