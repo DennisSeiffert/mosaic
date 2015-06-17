@@ -65,8 +65,12 @@ THREE.ReduceShader = {
 
 			"gl_FragColor =  vec4(1.0,1.0,1.0,1.0);",
 			"if (fract(gl_FragCoord.x / (3.0 * stepSizeX)) < 0.2 && fract(gl_FragCoord.y / (3.0 * stepSizeY)) < 0.2) {",
-				"sum = Reduce(vUv, stepX, stepY); //texture2D(tDiffuse, vUv).rgb; //",
-				"gl_FragColor = vec4(sum,1.0);",
+				"sum = Reduce(vUv, stepX, stepY); //texture2D(tDiffuse, vUv).rgb;",
+				"if(length(sum) > 1.5){",
+					"gl_FragColor = vec4(sum,1.0);",
+				"} else {",
+					"gl_FragColor = vec4(0.0,0.0,0.0,1.0);",
+				"}",
 			"} ",			
 		"}"
 
