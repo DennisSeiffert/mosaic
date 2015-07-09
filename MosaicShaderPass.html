@@ -9,9 +9,18 @@
 				background-color: #000000;
 				overflow: hidden;
 			}
+			  .thumb {
+    height: 40px;
+    width: 40px;
+    border: 1px solid #000;
+    margin: 10px 5px 0 0;
+  }
 		</style>
 	</head>
 	<body>
+
+		<input type="file" id="files" name="files[]" multiple />
+		<output id="list"></output>
 
 		<script src="http://threejs.org/build/three.min.js"></script> 
 		<script src="http://underscorejs.org/underscore-min.js"></script>
@@ -31,6 +40,8 @@
 		<script src="js/postprocessing/MosaicPass.js"></script>
 		<script src="js/postprocessing/TexturePass.js"></script>
 		<script src="js/postprocessing/SavePass.js"></script>
+
+		<script src="js/FileIO.js" ></script>
 
 
 		<script>
@@ -54,8 +65,8 @@
 
 			function InitializeThreejs(){
 				renderer = new THREE.WebGLRenderer();
-				renderer.setSize( width * 2, height );
-				renderer.setViewport(0,0, width, height);
+				renderer.setSize( width, height );
+				//renderer.setViewport(0,0, width, height);
 				document.body.appendChild( renderer.domElement );
 
 				var parameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false };
@@ -195,7 +206,7 @@
 
 				//renderer.render(scene, camera);	
 
-				renderer.setViewport(0,0, width, height);
+				//renderer.setViewport(0,0, width, height);
 
 				imageComparer.render();	
 
@@ -206,5 +217,8 @@
 
 		</script>
 
+		 <script type="text/javascript">
+		  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+		 </script>
 	</body>
 </html>
