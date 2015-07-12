@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - postprocessing</title>
+		<title>image composing - mosaic</title>
 		<meta charset="utf-8">
 		<style>
 			body {
@@ -51,11 +51,16 @@
 			var previousSingleImageMap ;	
 			var width = 400.0; var height = 400.0;
 			var mosaicWidth = 20.0, mosaicHeight = 20.0;
+			var bestResultMap = new Uint8Array(width * width * 4);
+			var bestImageAtPositionMap = {};
+			var currentMosaicImageIdentifier = '';
 
 			init();
 			animate();
 
 			function init() {			
+				bestResultMap = _.map(bestResultMap, function(e) { return 255;});
+
 				InitializeThreejs();
 
 				window.addEventListener( 'resize', onWindowResize, false );
@@ -78,6 +83,7 @@
 				camera.position.z = 2;
 
 				var mosaicImage = THREE.ImageUtils.loadTexture('img/2013-08-19 15.30.53.png');
+				currentMosaicImageIdentifier = 'img/2013-08-19 15.30.53.png';
 				var resultImage = THREE.ImageUtils.loadTexture('img/2013-08-19 15.30.55.png');
 
 				createMosaicTemplateWith(mosaicImage);	
@@ -210,9 +216,17 @@
 
 				imageComparer.render();	
 
-				//var array = getResult(renderer.context);
-
-
+				var currentResult = getResult(renderer.context);
+				for (var i = 0; i < currentResult.length; i+=3) {
+					var currentMeanIntensityValue = 0.3333333333 * (currentResult[i] + currentResult[i+1] + currentResult[i+2]);
+					var bestMeanIntensityValue = 0.3333333333 * (bestResultMap[i] + bestResultMap[i+1] + bestResultMap[i+2]);
+					if (currentMeanIntensityValue < bestMeanIntensityValue) {
+						bestImageAtPositionMap[i] = currentMosaicImageIdentifier;
+						bestResultMap[i] = currentResult[i];
+						bestResultMap[i+1] = currentResult[i+1];
+						bestResultMap[i+2] = currentResult[i+2];
+					};
+				};
 			}
 
 		</script>
