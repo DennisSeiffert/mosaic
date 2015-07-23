@@ -18,11 +18,13 @@
 		</style>
 	</head>
 	<body>
-
+		<button onclick='processImage();'>Generate image</button>
 		<input type="file" id="files" name="files[]" multiple />
 		<output id="list"></output>
 
 		<div id="MosaicImage"></div>
+
+
 
 		<script src="http://threejs.org/build/three.min.js"></script> 
 		<script src="http://underscorejs.org/underscore-min.js"></script>
@@ -145,7 +147,7 @@
 					if (bestImageAtPositionMap[i] !== undefined) {
 						//var image = THREE.ImageUtils.loadTexture('img/2013-08-19 15.30.55.png');
 						//var material =  new THREE.MeshBasicMaterial({ map: image});
-						var bestMeanIntensityValue = 0.3333333333 * (bestResultMap[i*4] + bestResultMap[i*4+1] + bestResultMap[i*4+2];
+						var bestMeanIntensityValue = 0.3333333333 * (bestResultMap[i*4] + bestResultMap[i*4+1] + bestResultMap[i*4+2]);
 						var material =  new THREE.MeshBasicMaterial({ color: bestMeanIntensityValue});
 						var instance = new THREE.Mesh( geometry, material );
 			        	instance.position.set(x - (width / 2.0),y - (height / 2.0), 0 );
@@ -246,6 +248,17 @@
 						bestResultMap[i+2] = currentResult[i+2];
 					};
 				};
+			}
+
+			function processImage(){				
+				$.ajax({
+				    type: 'POST',
+				    url: 'http://localhost:8080/mosaic',
+				    data: JSON.stringify(_.map(bestImageAtPositionMap, function(filename, index) { return {pos : index, image : filename}})),
+				    success: function(data) { alert(data); },
+				    contentType: "application/json",
+				    dataType: 'json'
+				});
 			}
 
 		</script>

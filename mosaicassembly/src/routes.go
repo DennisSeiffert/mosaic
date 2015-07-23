@@ -21,15 +21,21 @@ var routes = Routes{
         Index,
     },
     Route{
-        "TodoIndex",
-        "GET",
-        "/todos",
-        TodoIndex,
+        "ProcessMosaicImage",
+        "POST",
+        "/mosaic",
+        ProcessMosaicImage,
+    },
+      Route{
+        "ProcessMosaicImage",
+        "OPTIONS",
+        "/mosaic",
+        ProcessMosaicImage,
     },
     Route{
-        "TodoShow",
+        "DownloadMosaicImage",
         "GET",
-        "/todos/{todoId}",
-        TodoShow,
+        "/mosaic/{imageId}",
+        DownloadMosaicImage,
     },
 }
