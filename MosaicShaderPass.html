@@ -138,17 +138,19 @@
 			function createMosaicImage(scene){			
 				var object = new THREE.Object3D();
 
-				var geometry = new THREE.PlaneBufferGeometry( 3, 3 );				
+				var geometry = new THREE.PlaneBufferGeometry( 6, 6 );				
 			
 
-				for (var i = 0; i < width * height; i+=3) {
+				for (var i = 0; i < width * height; i+=6) {
 					var x = i % width;
 					var y = Math.floor(i / width);
 					if (bestImageAtPositionMap[i] !== undefined) {
 						//var image = THREE.ImageUtils.loadTexture('img/2013-08-19 15.30.55.png');
 						//var material =  new THREE.MeshBasicMaterial({ map: image});
 						var bestMeanIntensityValue = 0.3333333333 * (bestResultMap[i*4] + bestResultMap[i*4+1] + bestResultMap[i*4+2]);
-						var material =  new THREE.MeshBasicMaterial({ color: bestMeanIntensityValue});
+						var material =  new THREE.MeshBasicMaterial({ color: new THREE.Color(bestResultMap[i*4]*0.004,
+																							 bestResultMap[i*4+1]*0.004,
+																							 bestResultMap[i*4+2]*0.004)});
 						var instance = new THREE.Mesh( geometry, material );
 			        	instance.position.set(x - (width / 2.0),y - (height / 2.0), 0 );
 			        	object.add( instance );
